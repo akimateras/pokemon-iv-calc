@@ -3,7 +3,7 @@ import { StatCalculator } from "./StatCalculator";
 import { useState } from "react";
 import type { Nature, PokemonSpecies, StatKey, StatRecord } from "../../shared/types";
 
-type TabId = "iv-estimate" | "stat-calc";
+export type TabId = "iv-estimate" | "stat-calc";
 
 interface CalculatorTabsProps {
     readonly pokemon: PokemonSpecies | null;
@@ -13,6 +13,7 @@ interface CalculatorTabsProps {
     readonly ivInputs: StatRecord;
     readonly onStatChange: (key: StatKey, value: number) => void;
     readonly onIvChange: (key: StatKey, value: number) => void;
+    readonly onTabChange: (to: TabId) => void;
 }
 
 export function CalculatorTabs({
@@ -23,8 +24,16 @@ export function CalculatorTabs({
     ivInputs,
     onStatChange,
     onIvChange,
+    onTabChange,
 }: CalculatorTabsProps) {
     const [activeTab, setActiveTab] = useState<TabId>("iv-estimate");
+
+    function switchTab(to: TabId) {
+        if (to !== activeTab) {
+            onTabChange(to);
+            setActiveTab(to);
+        }
+    }
 
     return (
         <div className="section">
@@ -32,14 +41,14 @@ export function CalculatorTabs({
                 <button
                     className="tab-button"
                     data-active={activeTab === "iv-estimate" ? "true" : undefined}
-                    onClick={() => { setActiveTab("iv-estimate"); }}
+                    onClick={() => { switchTab("iv-estimate"); }}
                 >
                     個体値推定
                 </button>
                 <button
                     className="tab-button"
                     data-active={activeTab === "stat-calc" ? "true" : undefined}
-                    onClick={() => { setActiveTab("stat-calc"); }}
+                    onClick={() => { switchTab("stat-calc"); }}
                 >
                     ステータス計算
                 </button>

@@ -3,9 +3,10 @@ import { CalculatorTabs } from "./components/CalculatorTabs";
 import { LevelSelector } from "./components/LevelSelector";
 import { NatureSelector } from "./components/NatureSelector";
 import { PokemonSelector } from "./components/PokemonSelector";
-import { clampStatInputs } from "../shared/calculator";
+import { calculateAllStats, clampStatInputs, estimateAllIvs } from "../shared/calculator";
 import { DEFAULT_NATURE } from "../shared/natures";
 import { useState } from "react";
+import type { TabId } from "./components/CalculatorTabs";
 import type { Nature, PokemonSpecies, StatKey, StatRecord } from "../shared/types";
 
 const INITIAL_STATS: StatRecord = {
@@ -63,6 +64,27 @@ export function App() {
         setIvInputs(prev => updateStat(prev, key, value));
     }
 
+    function handleTabChange(to: TabId) {
+        if (selectedPokemon === null) return;
+
+        if (to === "stat-calc") {
+            // IV estimate → Stat calc: transfer estimated IVs (midpoint of range)
+            const e = estimateAllIvs(statInputs, selectedPokemon, level, nature);
+            setIvInputs({
+                hp: Math.floor((e.hp.min + e.hp.max) / 2),
+                attack: Math.floor((e.attack.min + e.attack.max) / 2),
+                defense: Math.floor((e.defense.min + e.defense.max) / 2),
+                spAttack: Math.floor((e.spAttack.min + e.spAttack.max) / 2),
+                spDefense: Math.floor((e.spDefense.min + e.spDefense.max) / 2),
+                speed: Math.floor((e.speed.min + e.speed.max) / 2),
+            });
+        } else {
+            // Stat calc → IV estimate: transfer calculated stats
+            const stats = calculateAllStats(ivInputs, selectedPokemon, level, nature);
+            setStatInputs(stats);
+        }
+    }
+
     return (
         <div className="app">
             <h1 className="app-title">ポケモン個体値計算機</h1>
@@ -90,6 +112,7 @@ export function App() {
                 ivInputs={ivInputs}
                 onStatChange={handleStatChange}
                 onIvChange={handleIvChange}
+                onTabChange={handleTabChange}
             />
         </div>
     );
