@@ -2,6 +2,7 @@ import { StatGauge } from "./StatGauge";
 import { StatInputGrid } from "./StatInputGrid";
 import { calculateAllStats, getAllStatRanges } from "../../shared/calculator";
 import { STAT_KEYS, STAT_LABELS } from "../../shared/types";
+import { statNatureClassName } from "../helpers";
 import { useMemo } from "react";
 import type { Nature, PokemonSpecies, StatKey, StatRecord } from "../../shared/types";
 
@@ -40,6 +41,7 @@ export function StatCalculator({ pokemon, level, nature, ivInputs, onIvChange }:
                 <StatInputGrid
                     ranges={IV_RANGES}
                     values={ivInputs}
+                    nature={nature}
                     onChange={onIvChange}
                 />
             </div>
@@ -49,6 +51,7 @@ export function StatCalculator({ pokemon, level, nature, ivInputs, onIvChange }:
                     <StatGauge
                         key={key}
                         label={STAT_LABELS[key]}
+                        labelClassName={statNatureClassName(nature, key)}
                         min={statRanges[key].min}
                         max={statRanges[key].max}
                         rangeStart={calculatedStats[key]}

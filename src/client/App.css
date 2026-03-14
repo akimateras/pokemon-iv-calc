@@ -169,6 +169,15 @@ body {
 .nature-table th {
     background: #f0f0f0;
     font-weight: normal;
+    height: 40px;
+}
+
+.nature-table thead .nature-radio-label {
+    color: #e63946;
+}
+
+.nature-table tbody .nature-radio-label {
+    color: #1a45c9;
 }
 
 .nature-table td.nature-cell {
@@ -318,6 +327,18 @@ body {
     border-radius: 4px;
     font-size: 0.9rem;
     text-align: right;
+}
+
+/* ============================
+   Nature-colored stat labels
+   ============================ */
+
+.stat-label-increased {
+    color: #e63946;
+}
+
+.stat-label-decreased {
+    color: #1a45c9;
 }
 
 /* ============================

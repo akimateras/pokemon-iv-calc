@@ -1,5 +1,6 @@
 interface StatGaugeProps {
     readonly label: string;
+    readonly labelClassName?: string | undefined;
     readonly min: number;
     readonly max: number;
     readonly rangeStart: number;
@@ -7,7 +8,7 @@ interface StatGaugeProps {
     readonly displayOverride?: string | undefined;
 }
 
-export function StatGauge({ label, min, max, rangeStart, rangeEnd, displayOverride }: StatGaugeProps) {
+export function StatGauge({ label, labelClassName, min, max, rangeStart, rangeEnd, displayOverride }: StatGaugeProps) {
     const isInvalid = displayOverride !== undefined;
 
     const totalRange = max - min;
@@ -32,7 +33,7 @@ export function StatGauge({ label, min, max, rangeStart, rangeEnd, displayOverri
 
     return (
         <div className="stat-gauge">
-            <span className="stat-gauge-label">{label}</span>
+            <span className={`stat-gauge-label ${labelClassName ?? ""}`}>{label}</span>
             <div className="stat-gauge-bar-container">
                 {!isInvalid && (
                     <div

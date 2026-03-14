@@ -1,10 +1,12 @@
 import { STAT_KEYS, STAT_LABELS } from "../../shared/types";
+import { statNatureClassName } from "../helpers";
 import { Fragment, useState } from "react";
-import type { StatKey, StatRecord, StatRange } from "../../shared/types";
+import type { Nature, StatKey, StatRecord, StatRange } from "../../shared/types";
 
 interface StatInputGridProps {
     readonly ranges: Readonly<Record<StatKey, StatRange>>;
     readonly values: StatRecord;
+    readonly nature: Nature;
     readonly onChange: (key: StatKey, value: number) => void;
 }
 
@@ -16,13 +18,13 @@ interface StatInputGridProps {
  * regardless of DOM order, so natural tab order follows:
  * slider1 → slider2 → ... → number1 → number2 → ...
  */
-export function StatInputGrid({ ranges, values, onChange }: StatInputGridProps) {
+export function StatInputGrid({ ranges, values, nature, onChange }: StatInputGridProps) {
     return (
         <div className="stat-input-grid">
             {STAT_KEYS.map((key, index) => (
                 <Fragment key={`s-${key}`}>
                     <span
-                        className="stat-input-grid-label"
+                        className={`stat-input-grid-label ${statNatureClassName(nature, key)}`}
                         style={{ gridRow: index + 1 }}
                     >
                         {STAT_LABELS[key]}
