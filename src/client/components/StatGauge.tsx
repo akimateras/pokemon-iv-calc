@@ -4,9 +4,12 @@ interface StatGaugeProps {
     readonly max: number;
     readonly rangeStart: number;
     readonly rangeEnd: number;
+    readonly displayOverride?: string | undefined;
 }
 
-export function StatGauge({ label, min, max, rangeStart, rangeEnd }: StatGaugeProps) {
+export function StatGauge({ label, min, max, rangeStart, rangeEnd, displayOverride }: StatGaugeProps) {
+    const isInvalid = displayOverride !== undefined;
+
     const totalRange = max - min;
     const leftPercent = totalRange > 0 ? ((rangeStart - min) / totalRange) * 100 : 0;
     const widthPercent = totalRange > 0 ? ((rangeEnd - rangeStart) / totalRange) * 100 : 100;
@@ -16,9 +19,9 @@ export function StatGauge({ label, min, max, rangeStart, rangeEnd }: StatGaugePr
         ? Math.max(widthPercent, 2)
         : Math.max(widthPercent, 1);
 
-    const displayText = rangeStart === rangeEnd
+    const displayText = displayOverride ?? (rangeStart === rangeEnd
         ? String(rangeStart)
-        : `${rangeStart}-${rangeEnd}`;
+        : `${rangeStart}-${rangeEnd}`);
 
     // Generate tick marks
     const tickCount = Math.min(max - min + 1, 32);
@@ -31,13 +34,15 @@ export function StatGauge({ label, min, max, rangeStart, rangeEnd }: StatGaugePr
         <div className="stat-gauge">
             <span className="stat-gauge-label">{label}</span>
             <div className="stat-gauge-bar-container">
-                <div
-                    className="stat-gauge-bar-fill"
-                    style={{
-                        left: `${leftPercent}%`,
-                        width: `${effectiveWidth}%`,
-                    }}
-                />
+                {!isInvalid && (
+                    <div
+                        className="stat-gauge-bar-fill"
+                        style={{
+                            left: `${leftPercent}%`,
+                            width: `${effectiveWidth}%`,
+                        }}
+                    />
+                )}
                 {tickCount <= 32 && (
                     <div className="stat-gauge-ticks">
                         {ticks.map(i => (

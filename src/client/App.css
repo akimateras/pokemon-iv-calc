@@ -287,6 +287,40 @@ body {
 }
 
 /* ============================
+   Stat Input Grid
+   ============================ */
+
+.stat-input-grid {
+    display: grid;
+    grid-template-columns: 72px 1fr 64px;
+    row-gap: 8px;
+    column-gap: 12px;
+    align-items: center;
+}
+
+.stat-input-grid-label {
+    grid-column: 1;
+    font-size: 0.9rem;
+    font-weight: bold;
+    text-align: right;
+}
+
+.stat-input-grid-range {
+    grid-column: 2;
+    accent-color: #4a90d9;
+}
+
+.stat-input-grid-number {
+    grid-column: 3;
+    width: 64px;
+    padding: 4px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    text-align: right;
+}
+
+/* ============================
    Stat Gauge
    ============================ */
 

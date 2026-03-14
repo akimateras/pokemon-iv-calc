@@ -1,5 +1,5 @@
-import { SliderInput } from "./SliderInput";
 import { StatGauge } from "./StatGauge";
+import { StatInputGrid } from "./StatInputGrid";
 import { estimateAllIvs, getAllStatRanges } from "../../shared/calculator";
 import { STAT_KEYS, STAT_LABELS } from "../../shared/types";
 import { useMemo } from "react";
@@ -24,33 +24,37 @@ export function IvEstimator({ pokemon, level, nature, statInputs, onStatChange }
         [statInputs, pokemon, level, nature],
     );
 
+    function isInRange(key: StatKey): boolean {
+        const range = statRanges[key];
+        return statInputs[key] >= range.min && statInputs[key] <= range.max;
+    }
+
     return (
         <div className="calculator-panel">
             <div className="calculator-column">
                 <h3 className="calculator-column-title">ステータス入力</h3>
-                {STAT_KEYS.map(key => (
-                    <SliderInput
-                        key={key}
-                        label={STAT_LABELS[key]}
-                        min={statRanges[key].min}
-                        max={statRanges[key].max}
-                        value={statInputs[key]}
-                        onChange={(v) => { onStatChange(key, v); }}
-                    />
-                ))}
+                <StatInputGrid
+                    ranges={statRanges}
+                    values={statInputs}
+                    onChange={onStatChange}
+                />
             </div>
             <div className="calculator-column">
                 <h3 className="calculator-column-title">個体値推定結果</h3>
-                {STAT_KEYS.map(key => (
-                    <StatGauge
-                        key={key}
-                        label={STAT_LABELS[key]}
-                        min={0}
-                        max={31}
-                        rangeStart={ivEstimations[key].min}
-                        rangeEnd={ivEstimations[key].max}
-                    />
-                ))}
+                {STAT_KEYS.map(key => {
+                    const valid = isInRange(key);
+                    return (
+                        <StatGauge
+                            key={key}
+                            label={STAT_LABELS[key]}
+                            min={0}
+                            max={31}
+                            rangeStart={valid ? ivEstimations[key].min : 0}
+                            rangeEnd={valid ? ivEstimations[key].max : 0}
+                            displayOverride={valid ? undefined : "??"}
+                        />
+                    );
+                })}
             </div>
         </div>
     );

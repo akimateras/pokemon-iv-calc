@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 interface SliderInputProps {
     readonly label: string;
     readonly min: number;
@@ -7,21 +9,49 @@ interface SliderInputProps {
 }
 
 export function SliderInput({ label, min, max, value, onChange }: SliderInputProps) {
+    // Internal text state for free-form editing in the number input.
+    // null means "not currently editing" — show the prop value instead.
+    const [editText, setEditText] = useState<string | null>(null);
+
     function handleRangeChange(e: React.ChangeEvent<HTMLInputElement>) {
+        setEditText(null);
         onChange(Number(e.target.value));
     }
 
     function handleNumberChange(e: React.ChangeEvent<HTMLInputElement>) {
-        const num = Number(e.target.value);
-        if (!Number.isNaN(num)) {
-            onChange(Math.max(min, Math.min(max, num)));
+        const text = e.target.value;
+        setEditText(text);
+        const num = Number(text);
+        if (text !== "" && !Number.isNaN(num)) {
+            // Report the raw value without clamping so the parent can
+            // show "??" or equivalent for out-of-range inputs.
+            onChange(Math.round(num));
         }
     }
 
-    function handleNumberBlur() {
-        // Clamp on blur in case user typed out-of-range value
-        if (value < min) onChange(min);
-        if (value > max) onChange(max);
+    function commitEdit() {
+        if (editText !== null) {
+            const num = Number(editText);
+            if (editText !== "" && !Number.isNaN(num)) {
+                onChange(Math.max(min, Math.min(max, Math.round(num))));
+            }
+            setEditText(null);
+        }
+    }
+
+    function handleFocus(e: React.FocusEvent<HTMLInputElement>) {
+        e.currentTarget.select();
+    }
+
+    function handleBlur() {
+        commitEdit();
+    }
+
+    function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+        if (e.key === "Enter") {
+            commitEdit();
+            e.currentTarget.blur();
+        }
     }
 
     return (
@@ -40,9 +70,11 @@ export function SliderInput({ label, min, max, value, onChange }: SliderInputPro
                 type="number"
                 min={min}
                 max={max}
-                value={value}
+                value={editText ?? value}
                 onChange={handleNumberChange}
-                onBlur={handleNumberBlur}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
+                onKeyDown={handleKeyDown}
             />
         </div>
     );
