@@ -1,6 +1,6 @@
-import { StatGauge } from "./StatGauge";
+import { IvGauge } from "./IvGauge";
 import { StatInputGrid } from "./StatInputGrid";
-import { calculateAllStats, getAllStatRanges } from "../../shared/calculator";
+import { calculateAllStats } from "../../shared/calculator";
 import { STAT_KEYS, STAT_LABELS } from "../../shared/types";
 import { statNatureClassName } from "../helpers";
 import { useMemo } from "react";
@@ -29,11 +29,6 @@ export function StatCalculator({ pokemon, level, nature, ivInputs, onIvChange }:
         [ivInputs, pokemon, level, nature],
     );
 
-    const statRanges = useMemo(
-        () => getAllStatRanges(pokemon, level, nature),
-        [pokemon, level, nature],
-    );
-
     return (
         <div className="calculator-panel">
             <div className="calculator-column">
@@ -48,14 +43,13 @@ export function StatCalculator({ pokemon, level, nature, ivInputs, onIvChange }:
             <div className="calculator-column">
                 <h3 className="calculator-column-title">ステータス計算結果</h3>
                 {STAT_KEYS.map(key => (
-                    <StatGauge
+                    <IvGauge
                         key={key}
                         label={STAT_LABELS[key]}
                         labelClassName={statNatureClassName(nature, key)}
-                        min={statRanges[key].min}
-                        max={statRanges[key].max}
-                        rangeStart={calculatedStats[key]}
-                        rangeEnd={calculatedStats[key]}
+                        rangeStart={ivInputs[key]}
+                        rangeEnd={ivInputs[key]}
+                        displayText={String(calculatedStats[key])}
                     />
                 ))}
             </div>

@@ -1,4 +1,4 @@
-import { StatGauge } from "./StatGauge";
+import { IvGauge } from "./IvGauge";
 import { StatInputGrid } from "./StatInputGrid";
 import { estimateAllIvs, getAllStatRanges } from "../../shared/calculator";
 import { STAT_KEYS, STAT_LABELS } from "../../shared/types";
@@ -46,15 +46,14 @@ export function IvEstimator({ pokemon, level, nature, statInputs, onStatChange }
                 {STAT_KEYS.map(key => {
                     const valid = isInRange(key);
                     return (
-                        <StatGauge
+                        <IvGauge
                             key={key}
                             label={STAT_LABELS[key]}
                             labelClassName={statNatureClassName(nature, key)}
-                            min={0}
-                            max={31}
                             rangeStart={valid ? ivEstimations[key].min : 0}
                             rangeEnd={valid ? ivEstimations[key].max : 0}
-                            displayOverride={valid ? undefined : "??"}
+                            invalid={!valid}
+                            displayText={valid ? undefined : "??"}
                         />
                     );
                 })}

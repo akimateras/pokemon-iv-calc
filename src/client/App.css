@@ -342,6 +342,47 @@ body {
 }
 
 /* ============================
+   IV Gauge (32-cell)
+   ============================ */
+
+.iv-gauge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.iv-gauge-label {
+    min-width: 72px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    text-align: right;
+}
+
+.iv-gauge-cells {
+    flex: 1;
+    display: flex;
+    gap: 1px;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #ddd;
+}
+
+.iv-gauge-cell {
+    flex: 1;
+    height: 24px;
+    background: #eee;
+    min-width: 0;
+}
+
+.iv-gauge-value {
+    min-width: 56px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    text-align: left;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ============================
    Stat Gauge
    ============================ */
 
