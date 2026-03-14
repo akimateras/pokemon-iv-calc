@@ -11,7 +11,6 @@ export function Combobox({ options, value, onChange, placeholder }: ComboboxProp
     const [inputText, setInputText] = useState(value);
     const [isOpen, setIsOpen] = useState(false);
     const [highlightedIndex, setHighlightedIndex] = useState(-1);
-    const containerRef = useRef<HTMLDivElement>(null);
     const listRef = useRef<HTMLUListElement>(null);
 
     // Sync input text when value changes externally
@@ -23,12 +22,6 @@ export function Combobox({ options, value, onChange, placeholder }: ComboboxProp
         ? options
         : options.filter(opt => opt.includes(inputText));
 
-    function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
-        setInputText(e.target.value);
-        setIsOpen(true);
-        setHighlightedIndex(-1);
-    }
-
     function handleSelect(option: string) {
         onChange(option);
         setInputText(option);
@@ -36,8 +29,34 @@ export function Combobox({ options, value, onChange, placeholder }: ComboboxProp
         setHighlightedIndex(-1);
     }
 
-    function handleFocus() {
+    function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+        setInputText(e.target.value);
         setIsOpen(true);
+        setHighlightedIndex(-1);
+    }
+
+    // Find the single candidate to auto-select:
+    // exact match by input text, or the sole filtered option.
+    function findAutoSelectCandidate(): string | undefined {
+        const exactMatch = filteredOptions.find(opt => opt === inputText);
+        if (exactMatch !== undefined) return exactMatch;
+        if (filteredOptions.length === 1) return filteredOptions[0];
+        return undefined;
+    }
+
+    function handleFocus(e: React.FocusEvent<HTMLInputElement>) {
+        e.currentTarget.select();
+        setIsOpen(true);
+    }
+
+    function handleBlur() {
+        const candidate = findAutoSelectCandidate();
+        if (candidate !== undefined) {
+            handleSelect(candidate);
+            return;
+        }
+        setIsOpen(false);
+        setInputText(value);
     }
 
     function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -54,6 +73,11 @@ export function Combobox({ options, value, onChange, placeholder }: ComboboxProp
             const highlighted = filteredOptions[highlightedIndex];
             if (highlighted !== undefined) {
                 handleSelect(highlighted);
+            } else {
+                const candidate = findAutoSelectCandidate();
+                if (candidate !== undefined) {
+                    handleSelect(candidate);
+                }
             }
         } else if (e.key === "Escape") {
             setIsOpen(false);
@@ -72,26 +96,15 @@ export function Combobox({ options, value, onChange, placeholder }: ComboboxProp
         }
     }, [highlightedIndex]);
 
-    // Close dropdown when clicking outside
-    useEffect(() => {
-        function handleClickOutside(e: MouseEvent) {
-            if (containerRef.current && e.target instanceof Node && !containerRef.current.contains(e.target)) {
-                setIsOpen(false);
-                setInputText(value);
-            }
-        }
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => { document.removeEventListener("mousedown", handleClickOutside); };
-    }, [value]);
-
     return (
-        <div className="combobox" ref={containerRef}>
+        <div className="combobox">
             <input
                 className="combobox-input"
                 type="text"
                 value={inputText}
                 onChange={handleInputChange}
                 onFocus={handleFocus}
+                onBlur={handleBlur}
                 onKeyDown={handleKeyDown}
                 placeholder={placeholder}
             />
