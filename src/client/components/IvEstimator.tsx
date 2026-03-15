@@ -1,6 +1,6 @@
 import { IvGauge } from "./IvGauge";
 import { StatInputGrid } from "./StatInputGrid";
-import { estimateAllIvs, getAllStatRanges } from "../../shared/calculator";
+import { estimateAllIvs, getAllAchievableStatValues } from "../../shared/calculator";
 import { STAT_KEYS, STAT_LABELS } from "../../shared/types";
 import { statNatureClassName } from "../helpers";
 import { useMemo } from "react";
@@ -15,8 +15,8 @@ interface IvEstimatorProps {
 }
 
 export function IvEstimator({ pokemon, level, nature, statInputs, onStatChange }: IvEstimatorProps) {
-    const statRanges = useMemo(
-        () => getAllStatRanges(pokemon, level, nature),
+    const achievableValues = useMemo(
+        () => getAllAchievableStatValues(pokemon, level, nature),
         [pokemon, level, nature],
     );
 
@@ -25,17 +25,12 @@ export function IvEstimator({ pokemon, level, nature, statInputs, onStatChange }
         [statInputs, pokemon, level, nature],
     );
 
-    function isInRange(key: StatKey): boolean {
-        const range = statRanges[key];
-        return statInputs[key] >= range.min && statInputs[key] <= range.max;
-    }
-
     return (
         <div className="calculator-panel">
             <div className="calculator-column">
                 <h3 className="calculator-column-title">ステータス入力</h3>
                 <StatInputGrid
-                    ranges={statRanges}
+                    validValues={achievableValues}
                     values={statInputs}
                     nature={nature}
                     onChange={onStatChange}
@@ -44,14 +39,15 @@ export function IvEstimator({ pokemon, level, nature, statInputs, onStatChange }
             <div className="calculator-column">
                 <h3 className="calculator-column-title">個体値推定結果</h3>
                 {STAT_KEYS.map(key => {
-                    const valid = isInRange(key);
+                    const estimation = ivEstimations[key];
+                    const valid = estimation !== undefined;
                     return (
                         <IvGauge
                             key={key}
                             label={STAT_LABELS[key]}
                             labelClassName={statNatureClassName(nature, key)}
-                            rangeStart={valid ? ivEstimations[key].min : 0}
-                            rangeEnd={valid ? ivEstimations[key].max : 0}
+                            rangeStart={estimation !== undefined ? estimation.min : 0}
+                            rangeEnd={estimation !== undefined ? estimation.max : 0}
                             invalid={!valid}
                             displayText={valid ? undefined : "??"}
                         />

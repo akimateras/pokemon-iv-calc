@@ -14,13 +14,15 @@ interface StatCalculatorProps {
     readonly onIvChange: (key: StatKey, value: number) => void;
 }
 
-const IV_RANGES: Readonly<Record<StatKey, { readonly min: number; readonly max: number }>> = {
-    hp: { min: 0, max: 31 },
-    attack: { min: 0, max: 31 },
-    defense: { min: 0, max: 31 },
-    spAttack: { min: 0, max: 31 },
-    spDefense: { min: 0, max: 31 },
-    speed: { min: 0, max: 31 },
+const IV_VALUES: readonly number[] = Array.from({ length: 32 }, (_, i) => i);
+
+const IV_VALID_VALUES: Readonly<Record<StatKey, readonly number[]>> = {
+    hp: IV_VALUES,
+    attack: IV_VALUES,
+    defense: IV_VALUES,
+    spAttack: IV_VALUES,
+    spDefense: IV_VALUES,
+    speed: IV_VALUES,
 };
 
 export function StatCalculator({ pokemon, level, nature, ivInputs, onIvChange }: StatCalculatorProps) {
@@ -34,7 +36,7 @@ export function StatCalculator({ pokemon, level, nature, ivInputs, onIvChange }:
             <div className="calculator-column">
                 <h3 className="calculator-column-title">個体値入力</h3>
                 <StatInputGrid
-                    ranges={IV_RANGES}
+                    validValues={IV_VALID_VALUES}
                     values={ivInputs}
                     nature={nature}
                     onChange={onIvChange}

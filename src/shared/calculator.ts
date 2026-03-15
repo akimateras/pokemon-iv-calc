@@ -1,4 +1,4 @@
-import type { IvRange, Nature, PokemonSpecies, StatKey, StatRange, StatRecord } from "./types";
+import type { IvRange, Nature, PokemonSpecies, StatKey, StatRecord } from "./types";
 
 /**
  * Get the nature modifier for a specific stat.
@@ -45,20 +45,6 @@ export function calculateStatValue(
 }
 
 /**
- * Get the range of possible stat values (IV 0 to IV 31).
- */
-export function getStatRange(
-    baseStat: number,
-    level: number,
-    natureModifier: number,
-    isHp: boolean,
-): StatRange {
-    const min = calculateStatValue(baseStat, 0, level, natureModifier, isHp);
-    const max = calculateStatValue(baseStat, 31, level, natureModifier, isHp);
-    return { min, max };
-}
-
-/**
  * Estimate IV range from an actual stat value.
  * Iterates over all possible IVs (0-31) and finds which ones produce the given stat.
  */
@@ -68,7 +54,7 @@ export function estimateIv(
     level: number,
     natureModifier: number,
     isHp: boolean,
-): IvRange {
+): IvRange | undefined {
     let min = 32;
     let max = -1;
 
@@ -81,28 +67,61 @@ export function estimateIv(
     }
 
     if (max === -1) {
-        return { min: 0, max: 0 };
+        return undefined;
     }
 
     return { min, max };
 }
 
 /**
- * Calculate all stat ranges for a Pokemon at a given level and nature.
+ * Get sorted unique achievable stat values for a single stat (IV 0-31).
  */
-export function getAllStatRanges(
+export function getAchievableStatValues(
+    baseStat: number,
+    level: number,
+    natureModifier: number,
+    isHp: boolean,
+): readonly number[] {
+    const seen = new Set<number>();
+    for (let iv = 0; iv <= 31; iv++) {
+        seen.add(calculateStatValue(baseStat, iv, level, natureModifier, isHp));
+    }
+    return [...seen].sort((a, b) => a - b);
+}
+
+/**
+ * Get achievable stat values for all stats.
+ */
+export function getAllAchievableStatValues(
     pokemon: PokemonSpecies,
     level: number,
     nature: Nature,
-): Readonly<Record<StatKey, StatRange>> {
+): Readonly<Record<StatKey, readonly number[]>> {
     return {
-        hp: getStatRange(pokemon.baseStats.hp, level, getNatureModifier(nature, "hp"), true),
-        attack: getStatRange(pokemon.baseStats.attack, level, getNatureModifier(nature, "attack"), false),
-        defense: getStatRange(pokemon.baseStats.defense, level, getNatureModifier(nature, "defense"), false),
-        spAttack: getStatRange(pokemon.baseStats.spAttack, level, getNatureModifier(nature, "spAttack"), false),
-        spDefense: getStatRange(pokemon.baseStats.spDefense, level, getNatureModifier(nature, "spDefense"), false),
-        speed: getStatRange(pokemon.baseStats.speed, level, getNatureModifier(nature, "speed"), false),
+        hp: getAchievableStatValues(pokemon.baseStats.hp, level, getNatureModifier(nature, "hp"), true),
+        attack: getAchievableStatValues(pokemon.baseStats.attack, level, getNatureModifier(nature, "attack"), false),
+        defense: getAchievableStatValues(pokemon.baseStats.defense, level, getNatureModifier(nature, "defense"), false),
+        spAttack: getAchievableStatValues(pokemon.baseStats.spAttack, level, getNatureModifier(nature, "spAttack"), false),
+        spDefense: getAchievableStatValues(pokemon.baseStats.spDefense, level, getNatureModifier(nature, "spDefense"), false),
+        speed: getAchievableStatValues(pokemon.baseStats.speed, level, getNatureModifier(nature, "speed"), false),
     };
+}
+
+/**
+ * Snap a value to the nearest value in a sorted array.
+ * The array must be non-empty.
+ */
+export function snapToNearestValue(value: number, sortedValues: readonly number[]): number {
+    let closest = value;
+    let minDiff = Infinity;
+    for (const v of sortedValues) {
+        const diff = Math.abs(value - v);
+        if (diff < minDiff) {
+            minDiff = diff;
+            closest = v;
+        }
+    }
+    return closest;
 }
 
 /**
@@ -113,7 +132,7 @@ export function estimateAllIvs(
     pokemon: PokemonSpecies,
     level: number,
     nature: Nature,
-): Readonly<Record<StatKey, IvRange>> {
+): Readonly<Record<StatKey, IvRange | undefined>> {
     return {
         hp: estimateIv(actualStats.hp, pokemon.baseStats.hp, level, getNatureModifier(nature, "hp"), true),
         attack: estimateIv(actualStats.attack, pokemon.baseStats.attack, level, getNatureModifier(nature, "attack"), false),
@@ -144,7 +163,7 @@ export function calculateAllStats(
 }
 
 /**
- * Clamp stat inputs to valid ranges when pokemon/level/nature changes.
+ * Snap stat inputs to nearest achievable values when pokemon/level/nature changes.
  */
 export function clampStatInputs(
     currentInputs: StatRecord,
@@ -152,20 +171,13 @@ export function clampStatInputs(
     level: number,
     nature: Nature,
 ): StatRecord {
-    const ranges = getAllStatRanges(pokemon, level, nature);
-
-    function clamp(value: number, range: StatRange): number {
-        if (value < range.min) return range.min;
-        if (value > range.max) return range.max;
-        return value;
-    }
-
+    const achievable = getAllAchievableStatValues(pokemon, level, nature);
     return {
-        hp: clamp(currentInputs.hp, ranges.hp),
-        attack: clamp(currentInputs.attack, ranges.attack),
-        defense: clamp(currentInputs.defense, ranges.defense),
-        spAttack: clamp(currentInputs.spAttack, ranges.spAttack),
-        spDefense: clamp(currentInputs.spDefense, ranges.spDefense),
-        speed: clamp(currentInputs.speed, ranges.speed),
+        hp: snapToNearestValue(currentInputs.hp, achievable.hp),
+        attack: snapToNearestValue(currentInputs.attack, achievable.attack),
+        defense: snapToNearestValue(currentInputs.defense, achievable.defense),
+        spAttack: snapToNearestValue(currentInputs.spAttack, achievable.spAttack),
+        spDefense: snapToNearestValue(currentInputs.spDefense, achievable.spDefense),
+        speed: snapToNearestValue(currentInputs.speed, achievable.speed),
     };
 }

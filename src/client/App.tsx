@@ -7,7 +7,7 @@ import { calculateAllStats, clampStatInputs, estimateAllIvs } from "../shared/ca
 import { DEFAULT_NATURE } from "../shared/natures";
 import { useState } from "react";
 import type { TabId } from "./components/CalculatorTabs";
-import type { Nature, PokemonSpecies, StatKey, StatRecord } from "../shared/types";
+import type { IvRange, Nature, PokemonSpecies, StatKey, StatRecord } from "../shared/types";
 
 const INITIAL_STATS: StatRecord = {
     hp: 0, attack: 0, defense: 0, spAttack: 0, spDefense: 0, speed: 0,
@@ -16,6 +16,11 @@ const INITIAL_STATS: StatRecord = {
 const INITIAL_IVS: StatRecord = {
     hp: 31, attack: 31, defense: 31, spAttack: 31, spDefense: 31, speed: 31,
 };
+
+function ivRangeMidpoint(range: IvRange | undefined): number {
+    if (range === undefined) return 0;
+    return Math.floor((range.min + range.max) / 2);
+}
 
 function updateStat(record: StatRecord, key: StatKey, value: number): StatRecord {
     switch (key) {
@@ -91,12 +96,12 @@ export function App() {
             // IV estimate → Stat calc: transfer estimated IVs (midpoint of range)
             const e = estimateAllIvs(statInputs, effectivePokemon, level, nature);
             setIvInputs({
-                hp: Math.floor((e.hp.min + e.hp.max) / 2),
-                attack: Math.floor((e.attack.min + e.attack.max) / 2),
-                defense: Math.floor((e.defense.min + e.defense.max) / 2),
-                spAttack: Math.floor((e.spAttack.min + e.spAttack.max) / 2),
-                spDefense: Math.floor((e.spDefense.min + e.spDefense.max) / 2),
-                speed: Math.floor((e.speed.min + e.speed.max) / 2),
+                hp: ivRangeMidpoint(e.hp),
+                attack: ivRangeMidpoint(e.attack),
+                defense: ivRangeMidpoint(e.defense),
+                spAttack: ivRangeMidpoint(e.spAttack),
+                spDefense: ivRangeMidpoint(e.spDefense),
+                speed: ivRangeMidpoint(e.speed),
             });
         } else {
             // Stat calc → IV estimate: transfer calculated stats

@@ -44,8 +44,3 @@ export interface IvRange {
     readonly min: number;
     readonly max: number;
 }
-
-export interface StatRange {
-    readonly min: number;
-    readonly max: number;
-}
