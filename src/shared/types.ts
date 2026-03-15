@@ -28,10 +28,16 @@ export interface Nature {
     readonly decreased: NatureStatKey;
 }
 
+export interface BaseStatSet {
+    readonly label: string;
+    readonly baseStats: StatRecord;
+}
+
 export interface PokemonSpecies {
     readonly dexNumber: number;
     readonly name: string;
     readonly baseStats: StatRecord;
+    readonly baseStatSets: readonly BaseStatSet[];
 }
 
 export interface IvRange {
