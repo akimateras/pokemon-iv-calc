@@ -1,7 +1,8 @@
 import { Combobox } from "./Combobox";
+import { matchesKanaRomaji } from "../../shared/kana";
 import { ALL_NATURES, findNatureByFactors } from "../../shared/natures";
 import { NATURE_STAT_KEYS, NATURE_TABLE_LABELS } from "../../shared/types";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import type { Nature, NatureStatKey } from "../../shared/types";
 
 interface NatureSelectorProps {
@@ -18,6 +19,11 @@ function getNatureAt(increased: NatureStatKey, decreased: NatureStatKey): Nature
 export function NatureSelector({ value, onChange }: NatureSelectorProps) {
     const natureNames = useMemo(
         () => ALL_NATURES.map(n => n.name),
+        [],
+    );
+
+    const filterFn = useCallback(
+        (option: string, input: string) => matchesKanaRomaji(input, option),
         [],
     );
 
@@ -50,6 +56,7 @@ export function NatureSelector({ value, onChange }: NatureSelectorProps) {
                 value={value.name}
                 onChange={handleComboboxChange}
                 placeholder="性格を選択..."
+                filterFn={filterFn}
             />
             <div className="nature-table-wrapper">
                 <table className="nature-table">

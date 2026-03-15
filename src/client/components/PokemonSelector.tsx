@@ -1,5 +1,6 @@
 import { Combobox } from "./Combobox";
 import { StatGauge } from "./StatGauge";
+import { matchesKanaRomaji } from "../../shared/kana";
 import { POKEMON_LIST } from "../../shared/pokemon";
 import { STAT_KEYS, STAT_LABELS } from "../../shared/types";
 import { useCallback, useMemo } from "react";
@@ -20,6 +21,11 @@ export function PokemonSelector({ value, selectedVariation, onChange, onVariatio
 
     const dexNumberByName = useMemo(
         () => new Map(POKEMON_LIST.map(p => [p.name, p.dexNumber])),
+        [],
+    );
+
+    const filterFn = useCallback(
+        (option: string, input: string) => matchesKanaRomaji(input, option),
         [],
     );
 
@@ -52,6 +58,7 @@ export function PokemonSelector({ value, selectedVariation, onChange, onVariatio
                 onChange={handleChange}
                 placeholder="ポケモンを選択..."
                 renderOption={renderOption}
+                filterFn={filterFn}
             />
             {hasVariations && (
                 <div className="variation-selector">

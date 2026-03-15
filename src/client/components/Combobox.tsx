@@ -7,9 +7,10 @@ interface ComboboxProps {
     readonly onChange: (value: string) => void;
     readonly placeholder: string;
     readonly renderOption?: (option: string) => ReactNode;
+    readonly filterFn?: (option: string, input: string) => boolean;
 }
 
-export function Combobox({ options, value, onChange, placeholder, renderOption }: ComboboxProps) {
+export function Combobox({ options, value, onChange, placeholder, renderOption, filterFn }: ComboboxProps) {
     const [inputText, setInputText] = useState(value);
     const [isOpen, setIsOpen] = useState(false);
     const [highlightedIndex, setHighlightedIndex] = useState(-1);
@@ -23,7 +24,9 @@ export function Combobox({ options, value, onChange, placeholder, renderOption }
 
     const filteredOptions = inputText === value
         ? options
-        : options.filter(opt => opt.includes(inputText));
+        : filterFn
+            ? options.filter(opt => filterFn(opt, inputText))
+            : options.filter(opt => opt.includes(inputText));
 
     function handleSelect(option: string) {
         onChange(option);
