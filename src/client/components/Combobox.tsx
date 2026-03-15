@@ -44,9 +44,15 @@ export function Combobox({ options, value, onChange, placeholder }: ComboboxProp
         return undefined;
     }
 
+    function openWithCurrentValue() {
+        setIsOpen(true);
+        const index = filteredOptions.indexOf(value);
+        setHighlightedIndex(index === -1 ? -1 : index);
+    }
+
     function handleFocus(e: React.FocusEvent<HTMLInputElement>) {
         e.currentTarget.select();
-        setIsOpen(true);
+        openWithCurrentValue();
     }
 
     function handleBlur() {
@@ -57,6 +63,12 @@ export function Combobox({ options, value, onChange, placeholder }: ComboboxProp
         }
         setIsOpen(false);
         setInputText(value);
+    }
+
+    function handleClick() {
+        if (!isOpen) {
+            openWithCurrentValue();
+        }
     }
 
     function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -70,13 +82,17 @@ export function Combobox({ options, value, onChange, placeholder }: ComboboxProp
             setHighlightedIndex(prev => (prev > 0 ? prev - 1 : prev));
         } else if (e.key === "Enter") {
             e.preventDefault();
-            const highlighted = filteredOptions[highlightedIndex];
-            if (highlighted !== undefined) {
-                handleSelect(highlighted);
+            if (!isOpen) {
+                openWithCurrentValue();
             } else {
-                const candidate = findAutoSelectCandidate();
-                if (candidate !== undefined) {
-                    handleSelect(candidate);
+                const highlighted = filteredOptions[highlightedIndex];
+                if (highlighted !== undefined) {
+                    handleSelect(highlighted);
+                } else {
+                    const candidate = findAutoSelectCandidate();
+                    if (candidate !== undefined) {
+                        handleSelect(candidate);
+                    }
                 }
             }
         } else if (e.key === "Escape") {
@@ -105,6 +121,7 @@ export function Combobox({ options, value, onChange, placeholder }: ComboboxProp
                 onChange={handleInputChange}
                 onFocus={handleFocus}
                 onBlur={handleBlur}
+                onClick={handleClick}
                 onKeyDown={handleKeyDown}
                 placeholder={placeholder}
             />
