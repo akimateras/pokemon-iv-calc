@@ -1,4 +1,6 @@
+import { StepButton } from "./StepButton";
 import { useState } from "react";
+
 
 interface SliderInputProps {
     readonly label: string;
@@ -54,9 +56,31 @@ export function SliderInput({ label, min, max, value, onChange }: SliderInputPro
         }
     }
 
+    function step(delta: number) {
+        const next = Math.max(min, Math.min(max, value + delta));
+        setEditText(null);
+        onChange(next);
+    }
+
     return (
         <div className="slider-input">
             <span className="slider-input-label">{label}</span>
+            <input
+                className="slider-input-number"
+                type="text"
+                inputMode="numeric"
+                value={editText ?? value}
+                onChange={handleNumberChange}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
+                onKeyDown={handleKeyDown}
+            />
+            <StepButton
+                className="slider-input-step-button"
+                onStep={() => { step(-1); }}
+            >
+                −
+            </StepButton>
             <input
                 className="slider-input-range"
                 type="range"
@@ -65,17 +89,12 @@ export function SliderInput({ label, min, max, value, onChange }: SliderInputPro
                 value={value}
                 onChange={handleRangeChange}
             />
-            <input
-                className="slider-input-number"
-                type="number"
-                min={min}
-                max={max}
-                value={editText ?? value}
-                onChange={handleNumberChange}
-                onFocus={handleFocus}
-                onBlur={handleBlur}
-                onKeyDown={handleKeyDown}
-            />
+            <StepButton
+                className="slider-input-step-button"
+                onStep={() => { step(1); }}
+            >
+                +
+            </StepButton>
         </div>
     );
 }

@@ -1,6 +1,8 @@
+import { StepButton } from "./StepButton";
 import { STAT_KEYS, STAT_LABELS } from "../../shared/types";
 import { statNatureClassName } from "../helpers";
 import { Fragment, useState } from "react";
+
 import type { Nature, StatKey, StatRecord, StatRange } from "../../shared/types";
 
 interface StatInputGridProps {
@@ -11,35 +13,22 @@ interface StatInputGridProps {
 }
 
 /**
- * Grid of stat inputs (label + slider + number) with tab order:
- * all sliders first, then all number inputs.
+ * Grid of stat inputs (label + number + slider) with tab order:
+ * all number inputs first, then all sliders.
  *
  * CSS Grid places each element in the correct visual row/column
  * regardless of DOM order, so natural tab order follows:
- * slider1 → slider2 → ... → number1 → number2 → ...
+ * number1 → number2 → ... → slider1 → slider2 → ...
  */
 export function StatInputGrid({ ranges, values, nature, onChange }: StatInputGridProps) {
+    function step(key: StatKey, delta: number) {
+        const { min, max } = ranges[key];
+        const next = Math.max(min, Math.min(max, values[key] + delta));
+        onChange(key, next);
+    }
+
     return (
         <div className="stat-input-grid">
-            {STAT_KEYS.map((key, index) => (
-                <Fragment key={`s-${key}`}>
-                    <span
-                        className={`stat-input-grid-label ${statNatureClassName(nature, key)}`}
-                        style={{ gridRow: index + 1 }}
-                    >
-                        {STAT_LABELS[key]}
-                    </span>
-                    <input
-                        className="stat-input-grid-range"
-                        type="range"
-                        style={{ gridRow: index + 1 }}
-                        min={ranges[key].min}
-                        max={ranges[key].max}
-                        value={Math.max(ranges[key].min, Math.min(ranges[key].max, values[key]))}
-                        onChange={(e) => { onChange(key, Number(e.target.value)); }}
-                    />
-                </Fragment>
-            ))}
             {STAT_KEYS.map((key, index) => (
                 <StatNumberCell
                     key={`n-${key}`}
@@ -49,6 +38,39 @@ export function StatInputGrid({ ranges, values, nature, onChange }: StatInputGri
                     value={values[key]}
                     onChange={(v) => { onChange(key, v); }}
                 />
+            ))}
+            {STAT_KEYS.map((key, index) => (
+                <Fragment key={`s-${key}`}>
+                    <span
+                        className={`stat-input-grid-label ${statNatureClassName(nature, key)}`}
+                        style={{ gridRow: index + 1 }}
+                    >
+                        {STAT_LABELS[key]}
+                    </span>
+                    <StepButton
+                        className="stat-input-grid-step-button"
+                        style={{ gridRow: index + 1, gridColumn: 3 }}
+                        onStep={() => { step(key, -1); }}
+                    >
+                        −
+                    </StepButton>
+                    <input
+                        className="stat-input-grid-range"
+                        type="range"
+                        style={{ gridRow: index + 1 }}
+                        min={ranges[key].min}
+                        max={ranges[key].max}
+                        value={Math.max(ranges[key].min, Math.min(ranges[key].max, values[key]))}
+                        onChange={(e) => { onChange(key, Number(e.target.value)); }}
+                    />
+                    <StepButton
+                        className="stat-input-grid-step-button"
+                        style={{ gridRow: index + 1, gridColumn: 5 }}
+                        onStep={() => { step(key, 1); }}
+                    >
+                        +
+                    </StepButton>
+                </Fragment>
             ))}
         </div>
     );
@@ -99,10 +121,9 @@ function StatNumberCell({ gridRow, min, max, value, onChange }: StatNumberCellPr
     return (
         <input
             className="stat-input-grid-number"
-            type="number"
+            type="text"
+            inputMode="numeric"
             style={{ gridRow }}
-            min={min}
-            max={max}
             value={editText ?? value}
             onChange={handleChange}
             onBlur={() => { commitEdit(); }}
