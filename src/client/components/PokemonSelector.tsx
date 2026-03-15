@@ -2,7 +2,7 @@ import { Combobox } from "./Combobox";
 import { StatGauge } from "./StatGauge";
 import { POKEMON_LIST } from "../../shared/pokemon";
 import { STAT_KEYS, STAT_LABELS } from "../../shared/types";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import type { PokemonSpecies } from "../../shared/types";
 
 interface PokemonSelectorProps {
@@ -17,6 +17,24 @@ export function PokemonSelector({ value, selectedVariation, onChange, onVariatio
         () => POKEMON_LIST.map(p => p.name),
         [],
     );
+
+    const dexNumberByName = useMemo(
+        () => new Map(POKEMON_LIST.map(p => [p.name, p.dexNumber])),
+        [],
+    );
+
+    const renderOption = useCallback((name: string) => {
+        const dexNumber = dexNumberByName.get(name);
+        if (dexNumber === undefined) return name;
+        return (
+            <>
+                <span className="combobox-dex-number">
+                    {String(dexNumber).padStart(4, "0")}:
+                </span>
+                {" "}{name}
+            </>
+        );
+    }, [dexNumberByName]);
 
     function handleChange(name: string) {
         const found = POKEMON_LIST.find(p => p.name === name);
@@ -33,6 +51,7 @@ export function PokemonSelector({ value, selectedVariation, onChange, onVariatio
                 value={value?.name ?? ""}
                 onChange={handleChange}
                 placeholder="ポケモンを選択..."
+                renderOption={renderOption}
             />
             {hasVariations && (
                 <div className="variation-selector">

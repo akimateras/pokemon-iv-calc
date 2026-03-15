@@ -1,13 +1,15 @@
 import { useEffect, useRef, useState } from "react";
+import type { ReactNode } from "react";
 
 interface ComboboxProps {
     readonly options: readonly string[];
     readonly value: string;
     readonly onChange: (value: string) => void;
     readonly placeholder: string;
+    readonly renderOption?: (option: string) => ReactNode;
 }
 
-export function Combobox({ options, value, onChange, placeholder }: ComboboxProps) {
+export function Combobox({ options, value, onChange, placeholder, renderOption }: ComboboxProps) {
     const [inputText, setInputText] = useState(value);
     const [isOpen, setIsOpen] = useState(false);
     const [highlightedIndex, setHighlightedIndex] = useState(-1);
@@ -138,7 +140,7 @@ export function Combobox({ options, value, onChange, placeholder }: ComboboxProp
                                 handleSelect(option);
                             }}
                         >
-                            {option}
+                            {renderOption ? renderOption(option) : option}
                         </li>
                     ))}
                 </ul>

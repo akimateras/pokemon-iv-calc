@@ -105,6 +105,11 @@ body {
     font-weight: bold;
 }
 
+.combobox-dex-number {
+    font-size: 0.8em;
+    color: #888;
+}
+
 /* ============================
    Variation Selector
    ============================ */
