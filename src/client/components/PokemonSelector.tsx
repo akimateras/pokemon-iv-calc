@@ -1,5 +1,7 @@
 import { Combobox } from "./Combobox";
+import { StatGauge } from "./StatGauge";
 import { POKEMON_LIST } from "../../shared/pokemon";
+import { STAT_KEYS, STAT_LABELS } from "../../shared/types";
 import { useMemo } from "react";
 import type { PokemonSpecies } from "../../shared/types";
 
@@ -28,6 +30,23 @@ export function PokemonSelector({ value, onChange }: PokemonSelectorProps) {
                 onChange={handleChange}
                 placeholder="ポケモンを選択..."
             />
+            {value && (
+                <div className="base-stat-gauges">
+                    <h3 className="base-stat-gauges-title">種族値</h3>
+                    {STAT_KEYS.map(key => (
+                        <StatGauge
+                            key={key}
+                            label={STAT_LABELS[key]}
+                            min={0}
+                            max={255}
+                            step={5}
+                            rangeStart={0}
+                            rangeEnd={value.baseStats[key]}
+                            displayText={String(value.baseStats[key])}
+                        />
+                    ))}
+                </div>
+            )}
         </div>
     );
 }

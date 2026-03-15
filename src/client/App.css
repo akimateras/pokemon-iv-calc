@@ -106,6 +106,25 @@ body {
 }
 
 /* ============================
+   Base Stat Gauges
+   ============================ */
+
+.base-stat-gauges {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.base-stat-gauges-title {
+    font-weight: bold;
+    font-size: 0.95rem;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #eee;
+    margin: 0 0 8px;
+}
+
+/* ============================
    Slider Input
    ============================ */
 
@@ -450,40 +469,20 @@ body {
     text-align: right;
 }
 
-.stat-gauge-bar-container {
+.stat-gauge-cells {
     flex: 1;
-    position: relative;
-    height: 24px;
-    background: #eee;
+    display: flex;
+    gap: 1px;
     border-radius: 4px;
     overflow: hidden;
+    background: #ddd;
 }
 
-.stat-gauge-bar-fill {
-    position: absolute;
-    top: 0;
-    height: 100%;
-    background: #4a90d9;
-    border-radius: 4px;
-    transition: left 0.15s, width 0.15s;
-    opacity: 0.7;
-}
-
-.stat-gauge-ticks {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    display: flex;
-    justify-content: space-between;
-    pointer-events: none;
-}
-
-.stat-gauge-tick {
-    width: 1px;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.08);
+.stat-gauge-cell {
+    flex: 1;
+    height: 24px;
+    background: #eee;
+    min-width: 0;
 }
 
 .stat-gauge-value {
