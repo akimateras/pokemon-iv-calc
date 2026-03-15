@@ -106,6 +106,31 @@ body {
 }
 
 /* ============================
+   Variation Selector
+   ============================ */
+
+.variation-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    margin-top: 8px;
+}
+
+.variation-option {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 2px 0;
+}
+
+.variation-option input[type="radio"] {
+    margin: 0;
+    accent-color: #4a90d9;
+}
+
+/* ============================
    Base Stat Gauges
    ============================ */
 

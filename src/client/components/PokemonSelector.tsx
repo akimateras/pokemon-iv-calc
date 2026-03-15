@@ -7,10 +7,12 @@ import type { PokemonSpecies } from "../../shared/types";
 
 interface PokemonSelectorProps {
     readonly value: PokemonSpecies | null;
+    readonly selectedVariation: number;
     readonly onChange: (pokemon: PokemonSpecies | null) => void;
+    readonly onVariationChange: (index: number) => void;
 }
 
-export function PokemonSelector({ value, onChange }: PokemonSelectorProps) {
+export function PokemonSelector({ value, selectedVariation, onChange, onVariationChange }: PokemonSelectorProps) {
     const pokemonNames = useMemo(
         () => POKEMON_LIST.map(p => p.name),
         [],
@@ -21,6 +23,8 @@ export function PokemonSelector({ value, onChange }: PokemonSelectorProps) {
         onChange(found ?? null);
     }
 
+    const hasVariations = value !== null && value.baseStatSets.length > 1;
+
     return (
         <div className="section">
             <div className="section-label">ポケモン</div>
@@ -30,6 +34,21 @@ export function PokemonSelector({ value, onChange }: PokemonSelectorProps) {
                 onChange={handleChange}
                 placeholder="ポケモンを選択..."
             />
+            {hasVariations && (
+                <div className="variation-selector">
+                    {value.baseStatSets.map((set, i) => (
+                        <label key={set.label} className="variation-option">
+                            <input
+                                type="radio"
+                                name="variation"
+                                checked={selectedVariation === i}
+                                onChange={() => { onVariationChange(i); }}
+                            />
+                            <span>{set.label}</span>
+                        </label>
+                    ))}
+                </div>
+            )}
             {value && (
                 <div className="base-stat-gauges">
                     <h3 className="base-stat-gauges-title">種族値</h3>

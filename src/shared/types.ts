@@ -17,7 +17,7 @@ export type NatureStatKey = typeof NATURE_STAT_KEYS[number];
 export const NATURE_TABLE_LABELS: Readonly<Record<NatureStatKey, string>> = {
     attack: "こうげき",
     defense: "ぼうぎょ",
-    spAttack: "とくしゅ",
+    spAttack: "とくこう",
     spDefense: "とくぼう",
     speed: "すばやさ",
 };

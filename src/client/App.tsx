@@ -28,31 +28,51 @@ function updateStat(record: StatRecord, key: StatKey, value: number): StatRecord
     }
 }
 
+function withVariation(pokemon: PokemonSpecies, variationIndex: number): PokemonSpecies {
+    const statSet = pokemon.baseStatSets[variationIndex];
+    if (!statSet) return pokemon;
+    return { ...pokemon, baseStats: statSet.baseStats };
+}
+
 export function App() {
     const [selectedPokemon, setSelectedPokemon] = useState<PokemonSpecies | null>(null);
+    const [selectedVariation, setSelectedVariation] = useState(0);
     const [level, setLevel] = useState(50);
     const [nature, setNature] = useState<Nature>(DEFAULT_NATURE);
     const [statInputs, setStatInputs] = useState<StatRecord>(INITIAL_STATS);
     const [ivInputs, setIvInputs] = useState<StatRecord>(INITIAL_IVS);
 
+    const effectivePokemon = selectedPokemon
+        ? withVariation(selectedPokemon, selectedVariation)
+        : null;
+
     function handlePokemonChange(pokemon: PokemonSpecies | null) {
         setSelectedPokemon(pokemon);
+        setSelectedVariation(0);
         if (pokemon) {
             setStatInputs(prev => clampStatInputs(prev, pokemon, level, nature));
         }
     }
 
+    function handleVariationChange(index: number) {
+        setSelectedVariation(index);
+        if (selectedPokemon) {
+            const effective = withVariation(selectedPokemon, index);
+            setStatInputs(prev => clampStatInputs(prev, effective, level, nature));
+        }
+    }
+
     function handleLevelChange(newLevel: number) {
         setLevel(newLevel);
-        if (selectedPokemon) {
-            setStatInputs(prev => clampStatInputs(prev, selectedPokemon, newLevel, nature));
+        if (effectivePokemon) {
+            setStatInputs(prev => clampStatInputs(prev, effectivePokemon, newLevel, nature));
         }
     }
 
     function handleNatureChange(newNature: Nature) {
         setNature(newNature);
-        if (selectedPokemon) {
-            setStatInputs(prev => clampStatInputs(prev, selectedPokemon, level, newNature));
+        if (effectivePokemon) {
+            setStatInputs(prev => clampStatInputs(prev, effectivePokemon, level, newNature));
         }
     }
 
@@ -65,11 +85,11 @@ export function App() {
     }
 
     function handleTabChange(to: TabId) {
-        if (selectedPokemon === null) return;
+        if (effectivePokemon === null) return;
 
         if (to === "stat-calc") {
             // IV estimate → Stat calc: transfer estimated IVs (midpoint of range)
-            const e = estimateAllIvs(statInputs, selectedPokemon, level, nature);
+            const e = estimateAllIvs(statInputs, effectivePokemon, level, nature);
             setIvInputs({
                 hp: Math.floor((e.hp.min + e.hp.max) / 2),
                 attack: Math.floor((e.attack.min + e.attack.max) / 2),
@@ -80,7 +100,7 @@ export function App() {
             });
         } else {
             // Stat calc → IV estimate: transfer calculated stats
-            const stats = calculateAllStats(ivInputs, selectedPokemon, level, nature);
+            const stats = calculateAllStats(ivInputs, effectivePokemon, level, nature);
             setStatInputs(stats);
         }
     }
@@ -90,8 +110,10 @@ export function App() {
             <h1 className="app-title">ポケモン個体値計算機</h1>
 
             <PokemonSelector
-                value={selectedPokemon}
+                value={effectivePokemon}
+                selectedVariation={selectedVariation}
                 onChange={handlePokemonChange}
+                onVariationChange={handleVariationChange}
             />
 
             <LevelSelector
@@ -105,7 +127,7 @@ export function App() {
             />
 
             <CalculatorTabs
-                pokemon={selectedPokemon}
+                pokemon={effectivePokemon}
                 level={level}
                 nature={nature}
                 statInputs={statInputs}
