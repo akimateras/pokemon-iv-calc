@@ -14,6 +14,7 @@ export function Combobox({ options, value, onChange, placeholder, renderOption }
     const [isOpen, setIsOpen] = useState(false);
     const [highlightedIndex, setHighlightedIndex] = useState(-1);
     const listRef = useRef<HTMLUListElement>(null);
+    const isBlurByTabRef = useRef(false);
 
     // Sync input text when value changes externally
     useEffect(() => {
@@ -58,6 +59,10 @@ export function Combobox({ options, value, onChange, placeholder, renderOption }
     }
 
     function handleBlur() {
+        if (isBlurByTabRef.current) {
+            isBlurByTabRef.current = false;
+            return;
+        }
         const candidate = findAutoSelectCandidate();
         if (candidate !== undefined) {
             handleSelect(candidate);
@@ -97,6 +102,17 @@ export function Combobox({ options, value, onChange, placeholder, renderOption }
                     }
                 }
             }
+        } else if (e.key === "Tab") {
+            isBlurByTabRef.current = true;
+            const candidate = findAutoSelectCandidate();
+            if (candidate !== undefined) {
+                onChange(candidate);
+                setInputText(candidate);
+            } else {
+                setInputText(value);
+            }
+            setIsOpen(false);
+            setHighlightedIndex(-1);
         } else if (e.key === "Escape") {
             setIsOpen(false);
             setInputText(value);
