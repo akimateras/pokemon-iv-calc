@@ -10,8 +10,10 @@ interface CalculatorTabsProps {
     readonly level: number;
     readonly nature: Nature;
     readonly statInputs: StatRecord;
+    readonly evInputs: StatRecord;
     readonly ivInputs: StatRecord;
     readonly onStatChange: (key: StatKey, value: number) => void;
+    readonly onEvChange: (key: StatKey, value: number) => void;
     readonly onIvChange: (key: StatKey, value: number) => void;
     readonly onTabChange: (to: TabId) => void;
 }
@@ -21,8 +23,10 @@ export function CalculatorTabs({
     level,
     nature,
     statInputs,
+    evInputs,
     ivInputs,
     onStatChange,
+    onEvChange,
     onIvChange,
     onTabChange,
 }: CalculatorTabsProps) {
@@ -66,7 +70,9 @@ export function CalculatorTabs({
                             level={level}
                             nature={nature}
                             statInputs={statInputs}
+                            evInputs={evInputs}
                             onStatChange={onStatChange}
+                            onEvChange={onEvChange}
                         />
                     )}
                     {activeTab === "stat-calc" && (

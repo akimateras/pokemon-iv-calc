@@ -1,3 +1,4 @@
+import { EvInputGrid } from "./EvInputGrid";
 import { IvGauge } from "./IvGauge";
 import { StatInputGrid } from "./StatInputGrid";
 import { estimateAllIvs, getAllAchievableStatValues } from "../../shared/calculator";
@@ -11,22 +12,24 @@ interface IvEstimatorProps {
     readonly level: number;
     readonly nature: Nature;
     readonly statInputs: StatRecord;
+    readonly evInputs: StatRecord;
     readonly onStatChange: (key: StatKey, value: number) => void;
+    readonly onEvChange: (key: StatKey, value: number) => void;
 }
 
-export function IvEstimator({ pokemon, level, nature, statInputs, onStatChange }: IvEstimatorProps) {
+export function IvEstimator({ pokemon, level, nature, statInputs, evInputs, onStatChange, onEvChange }: IvEstimatorProps) {
     const achievableValues = useMemo(
-        () => getAllAchievableStatValues(pokemon, level, nature),
-        [pokemon, level, nature],
+        () => getAllAchievableStatValues(pokemon, level, nature, evInputs),
+        [pokemon, level, nature, evInputs],
     );
 
     const ivEstimations = useMemo(
-        () => estimateAllIvs(statInputs, pokemon, level, nature),
-        [statInputs, pokemon, level, nature],
+        () => estimateAllIvs(statInputs, pokemon, level, nature, evInputs),
+        [statInputs, pokemon, level, nature, evInputs],
     );
 
     return (
-        <div className="calculator-panel">
+        <div className="calculator-panel calculator-panel-3col">
             <div className="calculator-column">
                 <h3 className="calculator-column-title">ステータス入力</h3>
                 <StatInputGrid
@@ -34,6 +37,13 @@ export function IvEstimator({ pokemon, level, nature, statInputs, onStatChange }
                     values={statInputs}
                     nature={nature}
                     onChange={onStatChange}
+                />
+            </div>
+            <div className="calculator-column">
+                <h3 className="calculator-column-title">努力値入力</h3>
+                <EvInputGrid
+                    values={evInputs}
+                    onChange={onEvChange}
                 />
             </div>
             <div className="calculator-column">

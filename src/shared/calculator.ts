@@ -1,5 +1,7 @@
 import type { IvRange, Nature, PokemonSpecies, StatKey, StatRecord } from "./types";
 
+const ZERO_EVS: StatRecord = { hp: 0, attack: 0, defense: 0, spAttack: 0, spDefense: 0, speed: 0 };
+
 /**
  * Get the nature modifier for a specific stat.
  * HP is never affected by nature. Neutral natures return 1.0.
@@ -14,18 +16,18 @@ export function getNatureModifier(nature: Nature, statKey: StatKey): number {
 
 /**
  * Calculate HP stat value.
- * Formula: floor((base * 2 + iv) * level / 100) + level + 10
+ * Formula: floor((base * 2 + iv + floor(ev / 4)) * level / 100) + level + 10
  */
-export function calculateHp(baseStat: number, iv: number, level: number): number {
-    return Math.floor((baseStat * 2 + iv) * level / 100) + level + 10;
+export function calculateHp(baseStat: number, iv: number, level: number, ev = 0): number {
+    return Math.floor((baseStat * 2 + iv + Math.floor(ev / 4)) * level / 100) + level + 10;
 }
 
 /**
  * Calculate non-HP stat value.
- * Formula: floor((floor((base * 2 + iv) * level / 100) + 5) * natureModifier)
+ * Formula: floor((floor((base * 2 + iv + floor(ev / 4)) * level / 100) + 5) * natureModifier)
  */
-export function calculateStat(baseStat: number, iv: number, level: number, natureModifier: number): number {
-    return Math.floor((Math.floor((baseStat * 2 + iv) * level / 100) + 5) * natureModifier);
+export function calculateStat(baseStat: number, iv: number, level: number, natureModifier: number, ev = 0): number {
+    return Math.floor((Math.floor((baseStat * 2 + iv + Math.floor(ev / 4)) * level / 100) + 5) * natureModifier);
 }
 
 /**
@@ -37,11 +39,12 @@ export function calculateStatValue(
     level: number,
     natureModifier: number,
     isHp: boolean,
+    ev = 0,
 ): number {
     if (isHp) {
-        return calculateHp(baseStat, iv, level);
+        return calculateHp(baseStat, iv, level, ev);
     }
-    return calculateStat(baseStat, iv, level, natureModifier);
+    return calculateStat(baseStat, iv, level, natureModifier, ev);
 }
 
 /**
@@ -54,12 +57,13 @@ export function estimateIv(
     level: number,
     natureModifier: number,
     isHp: boolean,
+    ev = 0,
 ): IvRange | undefined {
     let min = 32;
     let max = -1;
 
     for (let iv = 0; iv <= 31; iv++) {
-        const calculated = calculateStatValue(baseStat, iv, level, natureModifier, isHp);
+        const calculated = calculateStatValue(baseStat, iv, level, natureModifier, isHp, ev);
         if (calculated === actualStat) {
             if (iv < min) min = iv;
             if (iv > max) max = iv;
@@ -81,10 +85,11 @@ export function getAchievableStatValues(
     level: number,
     natureModifier: number,
     isHp: boolean,
+    ev = 0,
 ): readonly number[] {
     const seen = new Set<number>();
     for (let iv = 0; iv <= 31; iv++) {
-        seen.add(calculateStatValue(baseStat, iv, level, natureModifier, isHp));
+        seen.add(calculateStatValue(baseStat, iv, level, natureModifier, isHp, ev));
     }
     return [...seen].sort((a, b) => a - b);
 }
@@ -96,14 +101,15 @@ export function getAllAchievableStatValues(
     pokemon: PokemonSpecies,
     level: number,
     nature: Nature,
+    evs: StatRecord = ZERO_EVS,
 ): Readonly<Record<StatKey, readonly number[]>> {
     return {
-        hp: getAchievableStatValues(pokemon.baseStats.hp, level, getNatureModifier(nature, "hp"), true),
-        attack: getAchievableStatValues(pokemon.baseStats.attack, level, getNatureModifier(nature, "attack"), false),
-        defense: getAchievableStatValues(pokemon.baseStats.defense, level, getNatureModifier(nature, "defense"), false),
-        spAttack: getAchievableStatValues(pokemon.baseStats.spAttack, level, getNatureModifier(nature, "spAttack"), false),
-        spDefense: getAchievableStatValues(pokemon.baseStats.spDefense, level, getNatureModifier(nature, "spDefense"), false),
-        speed: getAchievableStatValues(pokemon.baseStats.speed, level, getNatureModifier(nature, "speed"), false),
+        hp: getAchievableStatValues(pokemon.baseStats.hp, level, getNatureModifier(nature, "hp"), true, evs.hp),
+        attack: getAchievableStatValues(pokemon.baseStats.attack, level, getNatureModifier(nature, "attack"), false, evs.attack),
+        defense: getAchievableStatValues(pokemon.baseStats.defense, level, getNatureModifier(nature, "defense"), false, evs.defense),
+        spAttack: getAchievableStatValues(pokemon.baseStats.spAttack, level, getNatureModifier(nature, "spAttack"), false, evs.spAttack),
+        spDefense: getAchievableStatValues(pokemon.baseStats.spDefense, level, getNatureModifier(nature, "spDefense"), false, evs.spDefense),
+        speed: getAchievableStatValues(pokemon.baseStats.speed, level, getNatureModifier(nature, "speed"), false, evs.speed),
     };
 }
 
@@ -132,14 +138,15 @@ export function estimateAllIvs(
     pokemon: PokemonSpecies,
     level: number,
     nature: Nature,
+    evs: StatRecord = ZERO_EVS,
 ): Readonly<Record<StatKey, IvRange | undefined>> {
     return {
-        hp: estimateIv(actualStats.hp, pokemon.baseStats.hp, level, getNatureModifier(nature, "hp"), true),
-        attack: estimateIv(actualStats.attack, pokemon.baseStats.attack, level, getNatureModifier(nature, "attack"), false),
-        defense: estimateIv(actualStats.defense, pokemon.baseStats.defense, level, getNatureModifier(nature, "defense"), false),
-        spAttack: estimateIv(actualStats.spAttack, pokemon.baseStats.spAttack, level, getNatureModifier(nature, "spAttack"), false),
-        spDefense: estimateIv(actualStats.spDefense, pokemon.baseStats.spDefense, level, getNatureModifier(nature, "spDefense"), false),
-        speed: estimateIv(actualStats.speed, pokemon.baseStats.speed, level, getNatureModifier(nature, "speed"), false),
+        hp: estimateIv(actualStats.hp, pokemon.baseStats.hp, level, getNatureModifier(nature, "hp"), true, evs.hp),
+        attack: estimateIv(actualStats.attack, pokemon.baseStats.attack, level, getNatureModifier(nature, "attack"), false, evs.attack),
+        defense: estimateIv(actualStats.defense, pokemon.baseStats.defense, level, getNatureModifier(nature, "defense"), false, evs.defense),
+        spAttack: estimateIv(actualStats.spAttack, pokemon.baseStats.spAttack, level, getNatureModifier(nature, "spAttack"), false, evs.spAttack),
+        spDefense: estimateIv(actualStats.spDefense, pokemon.baseStats.spDefense, level, getNatureModifier(nature, "spDefense"), false, evs.spDefense),
+        speed: estimateIv(actualStats.speed, pokemon.baseStats.speed, level, getNatureModifier(nature, "speed"), false, evs.speed),
     };
 }
 
@@ -151,14 +158,15 @@ export function calculateAllStats(
     pokemon: PokemonSpecies,
     level: number,
     nature: Nature,
+    evs: StatRecord = ZERO_EVS,
 ): StatRecord {
     return {
-        hp: calculateHp(pokemon.baseStats.hp, ivs.hp, level),
-        attack: calculateStat(pokemon.baseStats.attack, ivs.attack, level, getNatureModifier(nature, "attack")),
-        defense: calculateStat(pokemon.baseStats.defense, ivs.defense, level, getNatureModifier(nature, "defense")),
-        spAttack: calculateStat(pokemon.baseStats.spAttack, ivs.spAttack, level, getNatureModifier(nature, "spAttack")),
-        spDefense: calculateStat(pokemon.baseStats.spDefense, ivs.spDefense, level, getNatureModifier(nature, "spDefense")),
-        speed: calculateStat(pokemon.baseStats.speed, ivs.speed, level, getNatureModifier(nature, "speed")),
+        hp: calculateHp(pokemon.baseStats.hp, ivs.hp, level, evs.hp),
+        attack: calculateStat(pokemon.baseStats.attack, ivs.attack, level, getNatureModifier(nature, "attack"), evs.attack),
+        defense: calculateStat(pokemon.baseStats.defense, ivs.defense, level, getNatureModifier(nature, "defense"), evs.defense),
+        spAttack: calculateStat(pokemon.baseStats.spAttack, ivs.spAttack, level, getNatureModifier(nature, "spAttack"), evs.spAttack),
+        spDefense: calculateStat(pokemon.baseStats.spDefense, ivs.spDefense, level, getNatureModifier(nature, "spDefense"), evs.spDefense),
+        speed: calculateStat(pokemon.baseStats.speed, ivs.speed, level, getNatureModifier(nature, "speed"), evs.speed),
     };
 }
 
@@ -170,8 +178,9 @@ export function clampStatInputs(
     pokemon: PokemonSpecies,
     level: number,
     nature: Nature,
+    evs: StatRecord = ZERO_EVS,
 ): StatRecord {
-    const achievable = getAllAchievableStatValues(pokemon, level, nature);
+    const achievable = getAllAchievableStatValues(pokemon, level, nature, evs);
     return {
         hp: snapToNearestValue(currentInputs.hp, achievable.hp),
         attack: snapToNearestValue(currentInputs.attack, achievable.attack),

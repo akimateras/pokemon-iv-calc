@@ -17,6 +17,10 @@ const INITIAL_IVS: StatRecord = {
     hp: 31, attack: 31, defense: 31, spAttack: 31, spDefense: 31, speed: 31,
 };
 
+const INITIAL_EVS: StatRecord = {
+    hp: 0, attack: 0, defense: 0, spAttack: 0, spDefense: 0, speed: 0,
+};
+
 function ivRangeMidpoint(range: IvRange | undefined): number {
     if (range === undefined) return 0;
     return Math.floor((range.min + range.max) / 2);
@@ -46,6 +50,7 @@ export function App() {
     const [nature, setNature] = useState<Nature>(DEFAULT_NATURE);
     const [statInputs, setStatInputs] = useState<StatRecord>(INITIAL_STATS);
     const [ivInputs, setIvInputs] = useState<StatRecord>(INITIAL_IVS);
+    const [evInputs, setEvInputs] = useState<StatRecord>(INITIAL_EVS);
 
     const effectivePokemon = selectedPokemon
         ? withVariation(selectedPokemon, selectedVariation)
@@ -55,7 +60,7 @@ export function App() {
         setSelectedPokemon(pokemon);
         setSelectedVariation(0);
         if (pokemon) {
-            setStatInputs(prev => clampStatInputs(prev, pokemon, level, nature));
+            setStatInputs(prev => clampStatInputs(prev, pokemon, level, nature, evInputs));
         }
     }
 
@@ -63,26 +68,34 @@ export function App() {
         setSelectedVariation(index);
         if (selectedPokemon) {
             const effective = withVariation(selectedPokemon, index);
-            setStatInputs(prev => clampStatInputs(prev, effective, level, nature));
+            setStatInputs(prev => clampStatInputs(prev, effective, level, nature, evInputs));
         }
     }
 
     function handleLevelChange(newLevel: number) {
         setLevel(newLevel);
         if (effectivePokemon) {
-            setStatInputs(prev => clampStatInputs(prev, effectivePokemon, newLevel, nature));
+            setStatInputs(prev => clampStatInputs(prev, effectivePokemon, newLevel, nature, evInputs));
         }
     }
 
     function handleNatureChange(newNature: Nature) {
         setNature(newNature);
         if (effectivePokemon) {
-            setStatInputs(prev => clampStatInputs(prev, effectivePokemon, level, newNature));
+            setStatInputs(prev => clampStatInputs(prev, effectivePokemon, level, newNature, evInputs));
         }
     }
 
     function handleStatChange(key: StatKey, value: number) {
         setStatInputs(prev => updateStat(prev, key, value));
+    }
+
+    function handleEvChange(key: StatKey, value: number) {
+        const newEvs = updateStat(evInputs, key, value);
+        setEvInputs(newEvs);
+        if (effectivePokemon) {
+            setStatInputs(prev => clampStatInputs(prev, effectivePokemon, level, nature, newEvs));
+        }
     }
 
     function handleIvChange(key: StatKey, value: number) {
@@ -94,7 +107,7 @@ export function App() {
 
         if (to === "stat-calc") {
             // IV estimate → Stat calc: transfer estimated IVs (midpoint of range)
-            const e = estimateAllIvs(statInputs, effectivePokemon, level, nature);
+            const e = estimateAllIvs(statInputs, effectivePokemon, level, nature, evInputs);
             setIvInputs({
                 hp: ivRangeMidpoint(e.hp),
                 attack: ivRangeMidpoint(e.attack),
@@ -136,8 +149,10 @@ export function App() {
                 level={level}
                 nature={nature}
                 statInputs={statInputs}
+                evInputs={evInputs}
                 ivInputs={ivInputs}
                 onStatChange={handleStatChange}
+                onEvChange={handleEvChange}
                 onIvChange={handleIvChange}
                 onTabChange={handleTabChange}
             />
