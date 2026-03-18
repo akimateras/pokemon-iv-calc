@@ -1,3 +1,4 @@
+import { EvInputGrid } from "./EvInputGrid";
 import { IvGauge } from "./IvGauge";
 import { StatInputGrid } from "./StatInputGrid";
 import { calculateAllStats, estimateIv, getNatureModifier } from "../../shared/calculator";
@@ -11,7 +12,9 @@ interface StatCalculatorProps {
     readonly level: number;
     readonly nature: Nature;
     readonly ivInputs: StatRecord;
+    readonly evInputs: StatRecord;
     readonly onIvChange: (key: StatKey, value: number) => void;
+    readonly onEvChange: (key: StatKey, value: number) => void;
 }
 
 const IV_VALUES: readonly number[] = Array.from({ length: 32 }, (_, i) => i);
@@ -25,10 +28,10 @@ const IV_VALID_VALUES: Readonly<Record<StatKey, readonly number[]>> = {
     speed: IV_VALUES,
 };
 
-export function StatCalculator({ pokemon, level, nature, ivInputs, onIvChange }: StatCalculatorProps) {
+export function StatCalculator({ pokemon, level, nature, ivInputs, evInputs, onIvChange, onEvChange }: StatCalculatorProps) {
     const calculatedStats = useMemo(
-        () => calculateAllStats(ivInputs, pokemon, level, nature),
-        [ivInputs, pokemon, level, nature],
+        () => calculateAllStats(ivInputs, pokemon, level, nature, evInputs),
+        [ivInputs, pokemon, level, nature, evInputs],
     );
 
     const ivRanges = useMemo(() => {
@@ -37,16 +40,16 @@ export function StatCalculator({ pokemon, level, nature, ivInputs, onIvChange }:
             const isHp = key === "hp";
             const baseStat = pokemon.baseStats[key];
             const modifier = getNatureModifier(nature, key);
-            const range = estimateIv(calculatedStats[key], baseStat, level, modifier, isHp);
+            const range = estimateIv(calculatedStats[key], baseStat, level, modifier, isHp, evInputs[key]);
             if (range) {
                 result[key] = { start: range.min, end: range.max };
             }
         }
         return result;
-    }, [calculatedStats, pokemon, level, nature]);
+    }, [calculatedStats, pokemon, level, nature, evInputs]);
 
     return (
-        <div className="calculator-panel">
+        <div className="calculator-panel calculator-panel-3col">
             <div className="calculator-column">
                 <h3 className="calculator-column-title">個体値入力</h3>
                 <StatInputGrid
@@ -54,6 +57,13 @@ export function StatCalculator({ pokemon, level, nature, ivInputs, onIvChange }:
                     values={ivInputs}
                     nature={nature}
                     onChange={onIvChange}
+                />
+            </div>
+            <div className="calculator-column">
+                <h3 className="calculator-column-title">努力値入力</h3>
+                <EvInputGrid
+                    values={evInputs}
+                    onChange={onEvChange}
                 />
             </div>
             <div className="calculator-column">

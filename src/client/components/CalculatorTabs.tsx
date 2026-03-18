@@ -81,7 +81,9 @@ export function CalculatorTabs({
                             level={level}
                             nature={nature}
                             ivInputs={ivInputs}
+                            evInputs={evInputs}
                             onIvChange={onIvChange}
+                            onEvChange={onEvChange}
                         />
                     )}
                 </>

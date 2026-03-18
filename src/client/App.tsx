@@ -118,7 +118,7 @@ export function App() {
             });
         } else {
             // Stat calc → IV estimate: transfer calculated stats
-            const stats = calculateAllStats(ivInputs, effectivePokemon, level, nature);
+            const stats = calculateAllStats(ivInputs, effectivePokemon, level, nature, evInputs);
             setStatInputs(stats);
         }
     }
