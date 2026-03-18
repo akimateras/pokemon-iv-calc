@@ -1,6 +1,6 @@
 import { IvGauge } from "./IvGauge";
 import { StatInputGrid } from "./StatInputGrid";
-import { calculateAllStats } from "../../shared/calculator";
+import { calculateAllStats, estimateIv, getNatureModifier } from "../../shared/calculator";
 import { STAT_KEYS, STAT_LABELS } from "../../shared/types";
 import { statNatureClassName } from "../helpers";
 import { useMemo } from "react";
@@ -31,6 +31,20 @@ export function StatCalculator({ pokemon, level, nature, ivInputs, onIvChange }:
         [ivInputs, pokemon, level, nature],
     );
 
+    const ivRanges = useMemo(() => {
+        const result: Partial<Record<StatKey, { start: number; end: number }>> = {};
+        for (const key of STAT_KEYS) {
+            const isHp = key === "hp";
+            const baseStat = pokemon.baseStats[key];
+            const modifier = getNatureModifier(nature, key);
+            const range = estimateIv(calculatedStats[key], baseStat, level, modifier, isHp);
+            if (range) {
+                result[key] = { start: range.min, end: range.max };
+            }
+        }
+        return result;
+    }, [calculatedStats, pokemon, level, nature]);
+
     return (
         <div className="calculator-panel">
             <div className="calculator-column">
@@ -44,16 +58,19 @@ export function StatCalculator({ pokemon, level, nature, ivInputs, onIvChange }:
             </div>
             <div className="calculator-column">
                 <h3 className="calculator-column-title">ステータス計算結果</h3>
-                {STAT_KEYS.map(key => (
-                    <IvGauge
-                        key={key}
-                        label={STAT_LABELS[key]}
-                        labelClassName={statNatureClassName(nature, key)}
-                        rangeStart={ivInputs[key]}
-                        rangeEnd={ivInputs[key]}
-                        displayText={String(calculatedStats[key])}
-                    />
-                ))}
+                {STAT_KEYS.map(key => {
+                    const range = ivRanges[key];
+                    return (
+                        <IvGauge
+                            key={key}
+                            label={STAT_LABELS[key]}
+                            labelClassName={statNatureClassName(nature, key)}
+                            rangeStart={range?.start ?? ivInputs[key]}
+                            rangeEnd={range?.end ?? ivInputs[key]}
+                            displayText={String(calculatedStats[key])}
+                        />
+                    );
+                })}
             </div>
         </div>
     );
