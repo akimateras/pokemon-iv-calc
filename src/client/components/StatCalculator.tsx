@@ -15,6 +15,8 @@ interface StatCalculatorProps {
     readonly evInputs: StatRecord;
     readonly onIvChange: (key: StatKey, value: number) => void;
     readonly onEvChange: (key: StatKey, value: number) => void;
+    readonly onIvReset: () => void;
+    readonly onEvReset: () => void;
 }
 
 const IV_VALUES: readonly number[] = Array.from({ length: 32 }, (_, i) => i);
@@ -28,7 +30,7 @@ const IV_VALID_VALUES: Readonly<Record<StatKey, readonly number[]>> = {
     speed: IV_VALUES,
 };
 
-export function StatCalculator({ pokemon, level, nature, ivInputs, evInputs, onIvChange, onEvChange }: StatCalculatorProps) {
+export function StatCalculator({ pokemon, level, nature, ivInputs, evInputs, onIvChange, onEvChange, onIvReset, onEvReset }: StatCalculatorProps) {
     const calculatedStats = useMemo(
         () => calculateAllStats(ivInputs, pokemon, level, nature, evInputs),
         [ivInputs, pokemon, level, nature, evInputs],
@@ -58,6 +60,7 @@ export function StatCalculator({ pokemon, level, nature, ivInputs, evInputs, onI
                     nature={nature}
                     onChange={onIvChange}
                 />
+                <button className="reset-button" type="button" onClick={onIvReset}>リセット</button>
             </div>
             <div className="calculator-column">
                 <h3 className="calculator-column-title">努力値入力</h3>
@@ -65,6 +68,7 @@ export function StatCalculator({ pokemon, level, nature, ivInputs, evInputs, onI
                     values={evInputs}
                     onChange={onEvChange}
                 />
+                <button className="reset-button" type="button" onClick={onEvReset}>リセット</button>
             </div>
             <div className="calculator-column">
                 <h3 className="calculator-column-title">ステータス計算結果</h3>

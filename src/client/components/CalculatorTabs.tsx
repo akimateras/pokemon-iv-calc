@@ -15,6 +15,9 @@ interface CalculatorTabsProps {
     readonly onStatChange: (key: StatKey, value: number) => void;
     readonly onEvChange: (key: StatKey, value: number) => void;
     readonly onIvChange: (key: StatKey, value: number) => void;
+    readonly onStatReset: () => void;
+    readonly onEvReset: () => void;
+    readonly onIvReset: () => void;
     readonly onTabChange: (to: TabId) => void;
 }
 
@@ -28,6 +31,9 @@ export function CalculatorTabs({
     onStatChange,
     onEvChange,
     onIvChange,
+    onStatReset,
+    onEvReset,
+    onIvReset,
     onTabChange,
 }: CalculatorTabsProps) {
     const [activeTab, setActiveTab] = useState<TabId>("iv-estimate");
@@ -73,6 +79,8 @@ export function CalculatorTabs({
                             evInputs={evInputs}
                             onStatChange={onStatChange}
                             onEvChange={onEvChange}
+                            onStatReset={onStatReset}
+                            onEvReset={onEvReset}
                         />
                     )}
                     {activeTab === "stat-calc" && (
@@ -84,6 +92,8 @@ export function CalculatorTabs({
                             evInputs={evInputs}
                             onIvChange={onIvChange}
                             onEvChange={onEvChange}
+                            onIvReset={onIvReset}
+                            onEvReset={onEvReset}
                         />
                     )}
                 </>

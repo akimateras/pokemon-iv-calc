@@ -419,6 +419,27 @@ body {
     margin: 0;
 }
 
+.reset-button {
+    align-self: flex-start;
+    padding: 4px 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #f0f0f0;
+    font-size: 0.8rem;
+    cursor: pointer;
+    color: #555;
+}
+
+.reset-button:hover {
+    background: #e8f0fe;
+    border-color: #4a90d9;
+    color: #4a90d9;
+}
+
+.reset-button:active {
+    background: #d0e0f0;
+}
+
 .no-pokemon-message {
     text-align: center;
     padding: 32px;

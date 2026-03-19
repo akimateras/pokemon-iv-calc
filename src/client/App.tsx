@@ -21,6 +21,10 @@ const INITIAL_EVS: StatRecord = {
     hp: 0, attack: 0, defense: 0, spAttack: 0, spDefense: 0, speed: 0,
 };
 
+const DEFAULT_IVS: StatRecord = {
+    hp: 16, attack: 16, defense: 16, spAttack: 16, spDefense: 16, speed: 16,
+};
+
 function ivRangeMidpoint(range: IvRange | undefined): number {
     if (range === undefined) return 0;
     return Math.floor((range.min + range.max) / 2);
@@ -51,6 +55,7 @@ export function App() {
     const [statInputs, setStatInputs] = useState<StatRecord>(INITIAL_STATS);
     const [ivInputs, setIvInputs] = useState<StatRecord>(INITIAL_IVS);
     const [evInputs, setEvInputs] = useState<StatRecord>(INITIAL_EVS);
+    const [activeTab, setActiveTab] = useState<TabId>("iv-estimate");
 
     const effectivePokemon = selectedPokemon
         ? withVariation(selectedPokemon, selectedVariation)
@@ -60,7 +65,11 @@ export function App() {
         setSelectedPokemon(pokemon);
         setSelectedVariation(0);
         if (pokemon) {
-            setStatInputs(prev => clampStatInputs(prev, pokemon, level, nature, evInputs));
+            if (activeTab === "iv-estimate") {
+                setStatInputs(calculateAllStats(DEFAULT_IVS, pokemon, level, nature, evInputs));
+            } else {
+                setIvInputs(DEFAULT_IVS);
+            }
         }
     }
 
@@ -68,7 +77,11 @@ export function App() {
         setSelectedVariation(index);
         if (selectedPokemon) {
             const effective = withVariation(selectedPokemon, index);
-            setStatInputs(prev => clampStatInputs(prev, effective, level, nature, evInputs));
+            if (activeTab === "iv-estimate") {
+                setStatInputs(calculateAllStats(DEFAULT_IVS, effective, level, nature, evInputs));
+            } else {
+                setIvInputs(DEFAULT_IVS);
+            }
         }
     }
 
@@ -102,7 +115,25 @@ export function App() {
         setIvInputs(prev => updateStat(prev, key, value));
     }
 
+    function handleStatReset() {
+        if (effectivePokemon) {
+            setStatInputs(calculateAllStats(DEFAULT_IVS, effectivePokemon, level, nature, evInputs));
+        }
+    }
+
+    function handleEvReset() {
+        setEvInputs(INITIAL_EVS);
+        if (effectivePokemon) {
+            setStatInputs(prev => clampStatInputs(prev, effectivePokemon, level, nature, INITIAL_EVS));
+        }
+    }
+
+    function handleIvReset() {
+        setIvInputs(DEFAULT_IVS);
+    }
+
     function handleTabChange(to: TabId) {
+        setActiveTab(to);
         if (effectivePokemon === null) return;
 
         if (to === "stat-calc") {
@@ -154,6 +185,9 @@ export function App() {
                 onStatChange={handleStatChange}
                 onEvChange={handleEvChange}
                 onIvChange={handleIvChange}
+                onStatReset={handleStatReset}
+                onEvReset={handleEvReset}
+                onIvReset={handleIvReset}
                 onTabChange={handleTabChange}
             />
         </div>

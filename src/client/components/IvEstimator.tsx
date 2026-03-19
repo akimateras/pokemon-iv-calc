@@ -15,9 +15,11 @@ interface IvEstimatorProps {
     readonly evInputs: StatRecord;
     readonly onStatChange: (key: StatKey, value: number) => void;
     readonly onEvChange: (key: StatKey, value: number) => void;
+    readonly onStatReset: () => void;
+    readonly onEvReset: () => void;
 }
 
-export function IvEstimator({ pokemon, level, nature, statInputs, evInputs, onStatChange, onEvChange }: IvEstimatorProps) {
+export function IvEstimator({ pokemon, level, nature, statInputs, evInputs, onStatChange, onEvChange, onStatReset, onEvReset }: IvEstimatorProps) {
     const achievableValues = useMemo(
         () => getAllAchievableStatValues(pokemon, level, nature, evInputs),
         [pokemon, level, nature, evInputs],
@@ -38,6 +40,7 @@ export function IvEstimator({ pokemon, level, nature, statInputs, evInputs, onSt
                     nature={nature}
                     onChange={onStatChange}
                 />
+                <button className="reset-button" type="button" onClick={onStatReset}>リセット</button>
             </div>
             <div className="calculator-column">
                 <h3 className="calculator-column-title">努力値入力</h3>
@@ -45,6 +48,7 @@ export function IvEstimator({ pokemon, level, nature, statInputs, evInputs, onSt
                     values={evInputs}
                     onChange={onEvChange}
                 />
+                <button className="reset-button" type="button" onClick={onEvReset}>リセット</button>
             </div>
             <div className="calculator-column">
                 <h3 className="calculator-column-title">個体値推定結果</h3>
