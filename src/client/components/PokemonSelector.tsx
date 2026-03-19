@@ -3,7 +3,7 @@ import { StatGauge } from "./StatGauge";
 import { matchesKanaRomaji } from "../../shared/kana";
 import { POKEMON_LIST } from "../../shared/pokemon";
 import { STAT_KEYS, STAT_LABELS } from "../../shared/types";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type { PokemonSpecies } from "../../shared/types";
 
 interface PokemonSelectorProps {
@@ -14,6 +14,7 @@ interface PokemonSelectorProps {
 }
 
 export function PokemonSelector({ value, selectedVariation, onChange, onVariationChange }: PokemonSelectorProps) {
+    const [collapsed, setCollapsed] = useState(false);
     const pokemonNames = useMemo(
         () => POKEMON_LIST.map(p => p.name),
         [],
@@ -51,7 +52,20 @@ export function PokemonSelector({ value, selectedVariation, onChange, onVariatio
 
     return (
         <div className="section">
-            <div className="section-label">ポケモン</div>
+            <div className="section-header">
+                <div className="section-label">ポケモン</div>
+                <button
+                    className="section-collapse-button"
+                    onClick={() => { setCollapsed(prev => !prev); }}
+                    disabled={value === null}
+                    aria-expanded={!collapsed}
+                    aria-label={collapsed ? "展開" : "折りたたむ"}
+                >
+                    <svg className="section-collapse-icon" data-collapsed={collapsed ? "true" : undefined} viewBox="0 0 16 16">
+                        <path d="M4.5 6L8 10L11.5 6" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                </button>
+            </div>
             <Combobox
                 options={pokemonNames}
                 value={value?.name ?? ""}
@@ -75,7 +89,7 @@ export function PokemonSelector({ value, selectedVariation, onChange, onVariatio
                     ))}
                 </div>
             )}
-            {value && (
+            {!collapsed && value && (
                 <div className="base-stat-gauges">
                     <h3 className="base-stat-gauges-title">種族値</h3>
                     {STAT_KEYS.map(key => (

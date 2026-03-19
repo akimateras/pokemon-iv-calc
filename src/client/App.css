@@ -42,11 +42,57 @@ body {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.section-header .section-label {
+    margin-bottom: 0;
+}
+
 .section-label {
     font-weight: bold;
     margin-bottom: 8px;
     font-size: 0.9rem;
     color: #555;
+}
+
+.section-collapse-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 50%;
+    cursor: pointer;
+    color: #888;
+}
+
+.section-collapse-button:hover:not(:disabled) {
+    background: #e8f0fe;
+    border-color: #4a90d9;
+    color: #4a90d9;
+}
+
+.section-collapse-button:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+.section-collapse-icon {
+    width: 14px;
+    height: 14px;
+    transition: transform 0.15s ease;
+}
+
+.section-collapse-icon[data-collapsed="true"] {
+    transform: rotate(-90deg);
 }
 
 /* ============================

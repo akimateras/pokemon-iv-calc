@@ -2,7 +2,7 @@ import { Combobox } from "./Combobox";
 import { matchesKanaRomaji } from "../../shared/kana";
 import { ALL_NATURES, findNatureByFactors } from "../../shared/natures";
 import { NATURE_STAT_KEYS, NATURE_TABLE_LABELS } from "../../shared/types";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type { Nature, NatureStatKey } from "../../shared/types";
 
 interface NatureSelectorProps {
@@ -17,6 +17,7 @@ function getNatureAt(increased: NatureStatKey, decreased: NatureStatKey): Nature
 }
 
 export function NatureSelector({ value, onChange }: NatureSelectorProps) {
+    const [collapsed, setCollapsed] = useState(false);
     const natureNames = useMemo(
         () => ALL_NATURES.map(n => n.name),
         [],
@@ -50,7 +51,19 @@ export function NatureSelector({ value, onChange }: NatureSelectorProps) {
 
     return (
         <div className="section nature-section">
-            <div className="section-label">性格</div>
+            <div className="section-header">
+                <div className="section-label">性格</div>
+                <button
+                    className="section-collapse-button"
+                    onClick={() => { setCollapsed(prev => !prev); }}
+                    aria-expanded={!collapsed}
+                    aria-label={collapsed ? "展開" : "折りたたむ"}
+                >
+                    <svg className="section-collapse-icon" data-collapsed={collapsed ? "true" : undefined} viewBox="0 0 16 16">
+                        <path d="M4.5 6L8 10L11.5 6" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                </button>
+            </div>
             <Combobox
                 options={natureNames}
                 value={value.name}
@@ -58,7 +71,7 @@ export function NatureSelector({ value, onChange }: NatureSelectorProps) {
                 placeholder="性格を選択..."
                 filterFn={filterFn}
             />
-            <div className="nature-table-wrapper">
+            {!collapsed && <div className="nature-table-wrapper">
                 <table className="nature-table">
                     <thead>
                         <tr>
@@ -120,7 +133,7 @@ export function NatureSelector({ value, onChange }: NatureSelectorProps) {
                         ))}
                     </tbody>
                 </table>
-            </div>
+            </div>}
         </div>
     );
 }
