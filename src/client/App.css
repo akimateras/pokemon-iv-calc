@@ -187,9 +187,13 @@ body {
 
 .base-stat-gauges {
     margin-top: 12px;
+}
+
+.base-stat-gauges-list {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    max-width: 600px;
 }
 
 .base-stat-gauges-title {

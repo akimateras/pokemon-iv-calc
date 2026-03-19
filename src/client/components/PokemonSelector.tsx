@@ -92,18 +92,20 @@ export function PokemonSelector({ value, selectedVariation, onChange, onVariatio
             {!collapsed && value && (
                 <div className="base-stat-gauges">
                     <h3 className="base-stat-gauges-title">種族値</h3>
-                    {STAT_KEYS.map(key => (
-                        <StatGauge
-                            key={key}
-                            label={STAT_LABELS[key]}
-                            min={0}
-                            max={255}
-                            step={5}
-                            rangeStart={0}
-                            rangeEnd={value.baseStats[key]}
-                            displayText={String(value.baseStats[key])}
-                        />
-                    ))}
+                    <div className="base-stat-gauges-list">
+                        {STAT_KEYS.map(key => (
+                            <StatGauge
+                                key={key}
+                                label={STAT_LABELS[key]}
+                                min={0}
+                                max={200}
+                                step={5}
+                                rangeStart={0}
+                                rangeEnd={value.baseStats[key]}
+                                displayText={String(value.baseStats[key])}
+                            />
+                        ))}
+                    </div>
                 </div>
             )}
         </div>
